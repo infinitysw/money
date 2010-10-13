@@ -1,4 +1,4 @@
-require 'support/cattr_accessor'
+require 'support/cattr_accessor' unless defined? Rails
 require 'money/bank/no_exchange_bank'
 require 'money/bank/variable_exchange_bank'
 require 'money/core_extensions'
