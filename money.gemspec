@@ -19,5 +19,5 @@ Gem::Specification.new do |s|
   s.require_path = 'lib'
   s.authors = ["Brandon Keepers", "Tobias Luetke"]
   s.email = "brandon@opensoul.org"
-  s.homepage = "http://github.com/collectiveidea/money"
+  s.homepage = "http://github.com/fhirzall/money"
 end
