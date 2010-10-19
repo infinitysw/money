@@ -136,6 +136,10 @@ class Money
   def to_f
     cents.to_f / 10 ** precision
   end
+    
+  def to_json
+    cents.to_f / 10 ** precision
+  end  
 
   # Recieve the amount of this money object in another currency   
   def exchange_to(other_currency)
