@@ -115,12 +115,25 @@ class Money
 
     formatted = "$" + to_s(rules.include?(:no_cents) ? 0 : 2)
 
+    # BJM: Apply thousands_separator
+    thousands_separator_value = ','
+    formatted.gsub!(/(\d)(?=(?:\d{3})+(?:[^\d]|$))/, "\\1#{thousands_separator_value}")
+
+    # BJM: move negative outside ($-2.00 => -$2.00)
+    formatted.gsub!('$-', '-$')
+
+    # BJM: use parenthesis if requested and required
+    if rules.include?(:parenthesize_negative) && formatted.gsub!('-$', '$')
+      formatted = "(#{formatted})"
+    end
+
     if rules.include?(:with_currency)
       formatted << " "
       formatted << '<span class="currency">' if rules.include?(:html)
       formatted << currency
       formatted << '</span>' if rules.include?(:html)
     end
+    
     formatted
   end
 
