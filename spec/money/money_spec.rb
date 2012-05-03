@@ -135,6 +135,11 @@ describe Money do
       @can1.format.should == "$1.00"
     end
     
+    it "should format the currency with :precision when specified" do
+      @can1.format(:precision => 4).should == "$1.0000"
+
+    end
+
     it "should include the currency if :with_currency is specified" do
       @can1.format(:with_currency).should == "$1.00 CAD"
     end
@@ -148,6 +153,11 @@ describe Money do
     it "should allow rules to be combined" do
       Money.ca_dollar(570).format([:no_cents, :with_currency]).should == "$5 CAD"
       Money.ca_dollar(570).format(:no_cents, :with_currency).should == "$5 CAD"
+      Money.ca_dollar(570).format(:with_currency, {:precision => 4}).should == "$5.7000 CAD"
+    end
+    
+    it "should prioritize :no_cents over precision" do
+      Money.ca_dollar(570).format(:no_cents, {:precision => 4}).should == "$5"
     end
     
     it "should allow HTML formatting of currency" do

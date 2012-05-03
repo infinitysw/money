@@ -110,14 +110,48 @@ class Money
   #  Money.ca_dollar(570).format(:html, :with_currency) =>  "$5.70 <span class=\"currency\">CAD</span>"
   def format(*rules)
     return self.class.zero if zero? && self.class.zero
-    
+
+    # This section included for compatiblity since format in this fork
+    # uses a splatted array instead of a hash to accept parameters
+    # Hashes are needed to pass multi-dimensional parameters such as :precison => 5
+    # BEGIN compatibility block
+    rules_hash = {}
+    rules.each do |rule|
+      if rule.is_a?(Hash)
+        rule.each_key do |key|
+          rules.push(key)
+          rules_hash[key] = rule[key]
+        end
+      end
+    end
+    # END of compatibility block
+
+    # flattening array to allow explicit passing of arrays
     rules = rules.flatten
 
-    formatted = "$" + to_s(rules.include?(:no_cents) ? 0 : 2)
+    formatted =
+      if rules.include?(:no_cents)
+        "$#{to_s(0)}"
+      elsif rules.include?(:precision)
+        "$#{to_s(rules_hash[:precision])}"
+      else
+        "$#{to_s(2)}"
+      end
 
     # BJM: Apply thousands_separator
     thousands_separator_value = ','
-    formatted.gsub!(/(\d)(?=(?:\d{3})+(?:[^\d]|$))/, "\\1#{thousands_separator_value}")
+    decimal_separator = '.'
+    regexp_decimal = Regexp.escape(decimal_separator)
+
+    formatted_parts = formatted.split(decimal_separator)
+    integer_part = formatted_parts.first
+    decimal_part = formatted_parts.last unless rules.include?(:no_cents)
+
+    integer_part.gsub!(/(\d)(?=(?:\d{3})+(?:[^\d]{1}|$))/, "\\1#{thousands_separator_value}")
+
+    formatted = "#{integer_part}"
+
+    formatted += "#{decimal_separator}#{decimal_part}" unless rules.include?(:no_cents)
 
     # BJM: move negative outside ($-2.00 => -$2.00)
     formatted.gsub!('$-', '-$')
