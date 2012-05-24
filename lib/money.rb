@@ -180,6 +180,7 @@ class Money
     end
   end
   
+  # Converts money object to BigDecimal Value
   def to_d
     BigDecimal(cents.to_s) / 10 ** precision
   end
