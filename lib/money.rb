@@ -180,6 +180,10 @@ class Money
     end
   end
   
+  def to_d
+    BigDecimal(cents.to_s) / 10 ** precision
+  end
+
   def to_f
     cents.to_f / 10 ** precision
   end
