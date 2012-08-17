@@ -37,12 +37,6 @@ class RoundingMoneyExample < ActiveRecord::Base
 end
 
 describe Money, "using the money declaration in an ActiveRecord model" do
-  it "should allow dynamic finders to work the same as composed_of" do
-    record = MoneyExample.create!(:debit_amount => 100.to_money)
-    MoneyExample.find_by_debit_amount(0.to_money).should be_nil
-    MoneyExample.find_by_debit_amount(100.to_money).should == record
-  end
-
   describe "setter method" do
     it "should pass on money values" do
       MoneyExample.new(:debit_amount => 1.to_money).debit_amount.should == 1.to_money
