@@ -17,13 +17,18 @@ module ActiveRecord #:nodoc:
 
           define_method "#{name}" do
             val = self.read_attribute(field_name)
-            val ? ::Money.new(self.read_attribute(field_name), currency, precision) : val
+            val = 0 if !allow_nil && val.blank?
+            val ? ::Money.new(val, currency, precision) : val
           end
 
           define_method "#{name}=" do |val|
-            val = 0 if !allow_nil && val.blank?
-            val = BigDecimal.new(val.to_s).to_money(precision).round(rounding || precision)
-            self.send(:write_attribute, field_name, val.cents)
+            if allow_nil && val.blank?
+              self.send(:write_attribute, field_name, nil)
+            else
+              val = 0 if val.blank?
+              val = BigDecimal.new(val.to_s).to_money(precision).round(rounding || precision)
+              self.send(:write_attribute, field_name, val.cents)
+            end
           end
         end
       end
