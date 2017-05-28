@@ -42,10 +42,12 @@ class Money
 
   # Do two money objects equal? Only works if both objects are of the same currency
   def eql?(other_money)
+    other_money = other_money.to_money
     cents == other_money.cents && currency == other_money.currency
   end
 
   def <=>(other_money)
+    other_money = other_money.to_money
     if currency == other_money.currency
       cents <=> other_money.cents
     else
@@ -54,6 +56,7 @@ class Money
   end
 
   def +(other_money)
+    other_money = other_money.to_money
     other_money = other_money.exchange_to(currency) unless other_money.currency == currency
 
     new_precision = [precision, other_money.precision].max
@@ -61,6 +64,7 @@ class Money
   end
 
   def -(other_money)
+    other_money = other_money.to_money
     other_money = other_money.exchange_to(currency) unless other_money.currency == currency
 
     new_precision = [precision, other_money.precision].max
@@ -85,7 +89,6 @@ class Money
   def zero?
     cents == 0
   end
-
 
   # Format the price according to several rules
   # Currently supported are :with_currency, :no_cents and :html

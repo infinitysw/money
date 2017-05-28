@@ -35,9 +35,9 @@ class String
   #
   def to_money(precision = nil)
     # Get the currency
-    matches = scan /([A-Z]{2,3})/ 
+    matches = scan /([A-Z]{2,3})/
     currency = matches[0] ? matches[0][0] : Money.default_currency
-    
+
     if !precision
       precision = scan(/\.(\d+)/).to_s.length
       precision = 2 if precision < 2
@@ -48,5 +48,11 @@ class String
     matches = str.scan /(\-?[\d,]+(\.(\d+))?)/
     cents = matches[0] ? (matches[0][0].gsub(',', '').to_f * 10**precision) : 0
     Money.new(cents, currency, precision)
+  end
+end
+
+class Object
+  def to_money(precision = nil)
+    0.to_money(5)
   end
 end
