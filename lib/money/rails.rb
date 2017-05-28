@@ -9,29 +9,27 @@ module ActiveRecord #:nodoc:
 
       module ClassMethods
         def money(name, options = {})
-          allow_nil = options.has_key?(:allow_nil) ? options.delete(:allow_nil) : true
-          options = {:precision => 2, :cents => "#{name}_in_cents".to_sym }.merge(options)
-          mapping = [[options[:cents], 'cents']]
-          mapping << [options[:currency].to_s, 'currency'] if options[:currency]
-          composed_of name, :class_name => 'Money', :mapping => mapping, :allow_nil => allow_nil,
-            :converter => lambda{ |m|
-              if !allow_nil && m.nil?
-                currency = options[:currency] || ::Money.default_currency
-                m = ::Money.new(0, currency, options[:precision])
-              end
-              m.to_money(options[:precision])
-            },
-            :constructor => lambda{ |*args| 
-              cents, currency = args
-              cents ||= 0
-              currency ||= ::Money.default_currency
-              ::Money.new(cents, currency, options[:precision]) 
-            }
+          allow_nil  = options.has_key?(:allow_nil) ? options.delete(:allow_nil) : true
+          field_name = options[:cents] || "#{name}_in_cents"
+          precision  = options[:precision] || 2
+          currency   = (options[:currency] || ::Money.default_currency).to_s
+          rounding   = options[:round]
 
-          define_method "#{name}_with_cleanup=" do |amount|
-            send "#{name}_without_cleanup=", amount.blank? ? nil : amount.to_money(options[:precision])
+          define_method "#{name}" do
+            val = self.read_attribute(field_name)
+            val = 0 if !allow_nil && val.blank?
+            val ? ::Money.new(val, currency, precision) : val
           end
-          alias_method_chain "#{name}=", :cleanup
+
+          define_method "#{name}=" do |val|
+            if allow_nil && val.blank?
+              self.send(:write_attribute, field_name, nil)
+            else
+              val = 0 if val.blank?
+              val = BigDecimal.new(val.to_s).to_money(precision).round(rounding || precision)
+              self.send(:write_attribute, field_name, val.cents)
+            end
+          end
         end
       end
     end
